@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>woodmark</title>
+    <!-- p5.jsのライブラリを読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <button id="connect">CONNECT</button>
+    <h1>
+        WOODMARK
+    </h1>
+</body>
+</html>
+
+<script>
+    let bluetoothDevice;
+    let characteristic;
+    let lineWeight = 0;
+    let color = 0;
+    let radius = 0;
+    let positionX;
+    let positionY;
+
+    function setup() {
+        createCanvas(windowWidth, windowHeight);  // ウィンドウのサイズに合わせてキャンバスを作成
+        positionX = windowWidth/2;
+        positionY = windowHeight/2;
+        background(235)
+        // noLoop();  // 自動呼び出しを停止
+    }
+
+    function drawDistortedCircle(x, y, radius, noiseScale, distortion) {
+        beginShape();
+        for (let angle = 0; angle < TWO_PI; angle += 0.1) {
+            let xoff = map(cos(angle), -1, 1, 0, noiseScale * radius);
+            let yoff = map(sin(angle), -1, 1, 0, noiseScale * radius);
+            let r = radius + noise(xoff, yoff) * distortion;
+            let dx = r * cos(angle);
+            let dy = r * sin(angle);
+            vertex(x + dx, y + dy);
+        }
+        endShape(CLOSE);
+    }
+
+    // ウィンドウサイズが変更されたときに呼ばれる
+    function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);  // キャンバスのサイズをウィンドウに合わせて調整
+    }
+
+    document.getElementById('connect').addEventListener('click', async () => {
+        try {
+            bluetoothDevice = await navigator.bluetooth.requestDevice({
+                filters: [{ name: 'woodmark' }],
+                optionalServices: ['4fafc201-1fb5-459e-8fcc-c5c9c331914b']
+            });
+            const server = await bluetoothDevice.gatt.connect();
+            const service = await server.getPrimaryService('4fafc201-1fb5-459e-8fcc-c5c9c331914b');
+            characteristic = await service.getCharacteristic('beb5483e-36e1-4688-b7f5-ea07361b26a8');
+            
+            characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+            await characteristic.startNotifications();
+        } catch (error) {
+            console.log('Connection failed!', error);
+            document.getElementById('output').textContent = "Connection failed!";
+        }
+    });
+
+    function handleCharacteristicValueChanged(event) {
+        let value = event.target.value;
+        let numbers = [];
+        
+        for (let i = 0; i < value.byteLength; i += 4) {  // 4バイトごとに数値を取得
+            numbers.push(value.getInt32(i, true));  // リトルエンディアンで32ビット整数として取得
+        }
+
+        if (lineWeight != numbers[1] && color != numbers[0]){
+            console.log("!!!!!!!!!!!!!!")
+            background(220);  // 背景を灰色に設定
+
+            // strokeWeight(lineWeight); 
+            // drawDistortedCircle(width/2, height/2, radius, 0.1, 10);
+            fill(139, 69, 19, color*10); // 茶色の塗りつぶし
+            strokeWeight(lineWeight/10); 
+            drawDistortedCircle(positionX, positionY, radius, 0.1, 10); // 円を描く
+        }
+
+        lineWeight = numbers[1]
+        color = numbers[0];
+        radius = numbers[2] * 20;
+
+        if ((lineWeight + color + radius) == 0) {
+            positionX = random(width);
+            positionY = random(height);
+        }
+
+        console.log('Received numbers:', numbers);
+    }
+</script>
+
+<style>
+    /* ページ全体の余白とスクロールを無効化 */
+    h1 {
+        position: absolute;
+        bottom: 50%;
+
+        font-family:"ヒラギノ丸ゴ Pro W4","ヒラギノ丸ゴ Pro","Hiragino Maru Gothic Pro","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","HG丸ｺﾞｼｯｸM-PRO","HGMaruGothicMPRO";
+    }
+    body {
+        margin: 0;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+        font-family:"ヒラギノ丸ゴ Pro W4","ヒラギノ丸ゴ Pro","Hiragino Maru Gothic Pro","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","HG丸ｺﾞｼｯｸM-PRO","HGMaruGothicMPRO";
+    }
+    /* ボタンのスタイル */
+    #connect {
+        position: absolute;
+        font-family:"ヒラギノ丸ゴ Pro W4","ヒラギノ丸ゴ Pro","Hiragino Maru Gothic Pro","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","HG丸ｺﾞｼｯｸM-PRO","HGMaruGothicMPRO";
+        bottom: 90px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #d78b7a;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+    }
+    #connect:hover {
+        background-color: #d78b7a;
+    }
