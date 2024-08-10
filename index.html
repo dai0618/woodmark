@@ -76,7 +76,7 @@
             numbers.push(value.getInt32(i, true));  // リトルエンディアンで32ビット整数として取得
         }
 
-        if (lineWeight != numbers[1] && color != numbers[0]){
+        if (lineWeight != numbers[0] && color != numbers[1]){
             console.log("!!!!!!!!!!!!!!")
             // background(235);  // 背景を灰色に設定
 
@@ -87,8 +87,8 @@
             drawDistortedCircle(positionX, positionY, radius, 0.1, 10); // 円を描く
         }
 
-        lineWeight = numbers[1]
-        color = numbers[0];
+        lineWeight = numbers[0]
+        color = numbers[1];
         radius = numbers[2] * 20;
 
         if ((lineWeight + color + radius) == 0) {
