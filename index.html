@@ -24,6 +24,8 @@
     let positionX;
     let positionY;
 
+    let radiusData;
+
     function setup() {
         createCanvas(windowWidth, windowHeight);  // ウィンドウのサイズに合わせてキャンバスを作成
         positionX = windowWidth/2;
@@ -77,19 +79,22 @@
         }
 
         if (lineWeight != numbers[0] && color != numbers[1]){
-            console.log("!!!!!!!!!!!!!!")
-            // background(235);  // 背景を灰色に設定
-
-            // strokeWeight(lineWeight); 
-            // drawDistortedCircle(width/2, height/2, radius, 0.1, 10);
-            fill(139, 69, 19, color*10); // 茶色の塗りつぶし
-            strokeWeight(lineWeight/5); 
-            drawDistortedCircle(positionX, positionY, radius, 0.1, 10); // 円を描く
+            if (numbers[2] != 0){
+                radiusData = numbers[2]
+                fill(139, 69, 19, color*10); // 茶色の塗りつぶし
+                strokeWeight(lineWeight/5); 
+                drawDistortedCircle(positionX, positionY, numbers[2]/3, 0.1, 10); // 円を描く
+            }
+            else {
+                fill(139, 69, 19, color*10); // 茶色の塗りつぶし
+                strokeWeight(lineWeight/5); 
+                drawDistortedCircle(positionX, positionY, radiusData/3, 0.1, 10); // 円を描く
+            }
         }
 
         lineWeight = numbers[0]
         color = numbers[1];
-        radius = numbers[2] * 20;
+        radius = numbers[2];
 
         if ((lineWeight + color + radius) == 0) {
             positionX = random(width);
