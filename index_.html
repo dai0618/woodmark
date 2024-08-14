@@ -24,10 +24,6 @@
     let positionX;
     let positionY;
 
-    let radiusList = [];
-    let colorList = [];
-    let lineWeightList = [];
-
     let radiusData;
 
     function setup() {
@@ -84,28 +80,15 @@
 
         if (lineWeight != numbers[0] && color != numbers[1]){
             if (numbers[2] != 0){
-                radiusList.push(numbers[2])
-                colorList.push(color)
-
-                console.log(radiusList)
-                
-                for (let i = radiusList.length - 1; i >= 0; i--) {
-                    console.log(radiusList[i],colorList[i])
-                    fill(235); // 茶色の塗りつぶし
-                    drawDistortedCircle(positionX, positionY, radiusList[i]/3, 0.1, 10); // 円を描く
-                    fill(139, 69, 19, colorList[i]*10); // 茶色の塗りつぶし
-                    strokeWeight(0); 
-                    drawDistortedCircle(positionX, positionY, radiusList[i]/3, 0.1, 10); // 円を描く
-                }
+                radiusData = numbers[2]
+                fill(139, 69, 19, color*10); // 茶色の塗りつぶし
+                strokeWeight(lineWeight/5); 
+                drawDistortedCircle(positionX, positionY, numbers[2]/3, 0.1, 10); // 円を描く
             }
             else {
-                lineWeightList.push(lineWeight)
-
-                for (let i = radiusList.length - 1; i >= 0; i--) {
-                    fill(139, 69, 19, 0); // 茶色の塗りつぶし
-                    strokeWeight(lineWeightList[i]/5); 
-                    drawDistortedCircle(positionX, positionY, radiusList[i]/3, 0.1, 10); // 円を描く
-                }
+                fill(139, 69, 19, color*10); // 茶色の塗りつぶし
+                strokeWeight(lineWeight/5); 
+                drawDistortedCircle(positionX, positionY, radiusData/3, 0.1, 10); // 円を描く
             }
         }
 
@@ -116,10 +99,6 @@
         if ((lineWeight + color + radius) == 0) {
             positionX = random(width);
             positionY = random(height);
-
-            radiusList = [];
-            colorList = [];
-            lineWeightList = [];
         }
 
         console.log('Received numbers:', numbers);
